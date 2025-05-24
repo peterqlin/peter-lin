@@ -1,9 +1,12 @@
-import React from 'react'
+import Canvas from './Canvas';
+import './App.css';
 
-const App = () => {
+function App() {
   return (
-    <div>Peter Lin</div>
-  )
+    <div style={{ width: '100vw', height: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+      <Canvas />
+    </div>
+  );
 }
 
-export default App
+export default App;
