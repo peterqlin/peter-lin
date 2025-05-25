@@ -12,6 +12,8 @@ const Canvas = props => {
     Paper.setup(canvas);
     Paper.view.viewSize = new Paper.Size(window.innerWidth, window.innerHeight);
 
+    // * BEGIN CENTER CIRCLE + RASTER
+
     const centerCircle = new Paper.Path.Circle({
       center: Paper.view.center,
       radius: width / 2
@@ -32,6 +34,11 @@ const Canvas = props => {
       clipped: true
     });
 
+    // * END CENTER CIRCLE + RASTER
+
+
+    // * BEGIN RIGHT CIRCLE + RASTER
+
     const rightCircle = new Paper.Path.Circle({
       center: Paper.view.center.add([width, 0]),
       radius: width / 4,
@@ -40,10 +47,10 @@ const Canvas = props => {
     });
 
     const rightRaster = new Paper.Raster({
-      source: 'peter0.jpg',
+      source: 'amongus-bg.jpg',
       position: rightCircle.position,
       onLoad: () => {
-        const scaleFactor = width * 4 / rightRaster.width;
+        const scaleFactor = width * 3.1 / rightRaster.width;
         rightRaster.scale(scaleFactor, scaleFactor)
       }
     });
@@ -54,6 +61,8 @@ const Canvas = props => {
       clipped: true
     });
 
+    // * END RIGHT CIRCLE + RASTER
+
     const triggerLayer = new Paper.Layer();
 
     const duration = 500;
@@ -61,14 +70,26 @@ const Canvas = props => {
     const rightCircleTrigger = new Paper.Path.Circle({
       center: Paper.view.center.add([width, 0]),
       radius: width / 4,
-      fillColor: new Paper.Color(0, 0, 0, 0.001),
+      fillColor: 'red',
       applyMatrix: false,
       onMouseEnter: () => {
-        rightCircle.tweenTo(
-          { scaling: 6.1 },
+        rightCircleTrigger.tween(
+          { opacity: 1 },
+          { opacity: 0 },
           {
             duration: duration,
             easing: 'easeInOutQuad'
+          }
+        );
+        rightCircle.tween(
+          { scaling: 1 },
+          { scaling: 6.1 },
+          {
+            duration: duration,
+            easing: 'easeInOutQuad',
+            onComplete: () => {
+              console.log('tween done');
+            }
           }
         );
         centerCircleRasterGroup.tween(
@@ -76,12 +97,21 @@ const Canvas = props => {
           { rotation: 360, scaling: 0.001, opacity: 0, position: rightCircle.position },
           {
             duration: duration,
-            easing: 'easeInOutQuad'
+            easing: 'easeInOutQuad',
           }
         );
       },
       onMouseLeave: () => {
-        rightCircle.tweenTo(
+        rightCircleTrigger.tween(
+          { opacity: 0 },
+          { opacity: 1 },
+          {
+            duration: duration,
+            easing: 'easeInOutQuad'
+          }
+        );
+        rightCircle.tween(
+          { scaling: 6.1 },
           { scaling: 1 },
           {
             duration: duration,
