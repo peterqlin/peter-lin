@@ -20,41 +20,32 @@ export const setupBalls = (center, boundaryRadius, data) => {
     };
     const text = new Paper.PointText({
       point: center,
-      content: 'buh',
+      content: data.pages[i],
       fillColor: 'black',
       fontFamily: 'Courier New',
       fontWeight: 'bold',
       fontSize: radius / 4,
+    });
+    text.position = text.position.subtract(new Paper.Point(text.bounds.width / 2, 0));
+    const textBackground = new Paper.Shape.Rectangle({
+      from: text.bounds.topLeft,
+      to: text.bounds.bottomRight,
+      fillColor: 'white',
+      radius: 10
+    });
+    const textBox = new Paper.Group({
+      children: [textBackground, text],
+      scaling: 0.01,
       applyMatrix: false
     });
     const ball = new Paper.Group({
-      children: [new Paper.Shape.Circle(center, radius), raster, text],
+      children: [new Paper.Shape.Circle(center, radius), raster, textBox],
       clipped: true,
       radius: radius,
       opacity: 0,
       velocity: new Paper.Point(speed * Math.cos((launchAngle * Math.PI) / 180), speed * Math.sin((launchAngle * Math.PI) / 180)),
       mass: radius,
       applyMatrix: false,
-      onMouseEnter: () => {
-        ball.tween(
-          { scaling: ball.scaling },
-          { scaling: 1.2 },
-          {
-            duration: 300,
-            easing: "easeInOutQuad"
-          }
-        );
-      },
-      onMouseLeave: () => {
-        ball.tween(
-          { scaling: ball.scaling },
-          { scaling: 1 },
-          {
-            duration: 300,
-            easing: "easeInOutQuad"
-          }
-        );
-      }
     });
     return ball;
   });
@@ -87,7 +78,7 @@ export const animateBalls = (isActive, balls, boundary) => {
         }
       }
 
-      // * screen boundary collision check
+      // * screen boundary collision check (doesn't work rip)
       if (ball.position.x - ball.radius < 0 || ball.position.x + ball.radius > Paper.view.size.width) {
         ball.velocity.x *= -1;
       }

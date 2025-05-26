@@ -7,14 +7,13 @@ import { setupBalls, animateBalls } from './utils';
 const Canvas = props => {
   const canvasRef = useRef(null);
   const navigate = useNavigate();
-  const pages = ['about', 'projects'];
 
   useEffect(() => {
     Paper.setup(canvasRef.current);
 
     const width = 600;
     const radius = width / 2;
-    Paper.view.viewSize = new Paper.Size(width, width);
+    Paper.view.viewSize = new Paper.Size(window.innerWidth, window.innerHeight);
 
     const data = props.data;
     let isActive = false;
@@ -27,12 +26,10 @@ const Canvas = props => {
     for (let i = 0; i < balls.length; i++) {
       const ball = balls[i];
       const text = ball.children[2];
-      text.content = 'hello world';
-      text.position = text.position.subtract(new Paper.Point(text.bounds.width / 2, 0));
-      text.scaling = 0.01;
-      ball.onClick = () => {
-        navigate(pages[i]);
-      };
+      // * clicking on ball group sometimes triggers this which is annoying
+      // ball.onClick = () => {
+      //   navigate(data.pages[i]);
+      // };
       ball.onMouseEnter = () => {
         text.tween(
           { scaling: text.scaling },
