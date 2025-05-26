@@ -3,12 +3,12 @@ import './App.css';
 
 function App() {
   const data1 = {
-    count: 3,
-    images: ['img_src1', 'img_src2', 'img_src3']
+    count: 5,
+    images: ['peter0.jpg', 'peter1.jpg', 'peter2.jpg', 'peter3.jpg', 'peter4.jpg']
   };
   const data2 = {
-    count: 5,
-    images: ['img_src1', 'img_src2', 'img_src3', 'img_src4', 'img_src5']
+    count: 0,
+    images: []
   };
   return (
     <div id="canvas-container">

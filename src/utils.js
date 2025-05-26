@@ -1,20 +1,26 @@
 import Paper from 'paper';
 
-export const setupBalls = (center, boundaryRadius, ballData) => {
-  const invisibleBoundary = new Paper.Shape.Circle(center, boundaryRadius);
+export const setupBalls = (center, boundaryRadius, data) => {
+  const boundary = new Paper.Shape.Circle(center, boundaryRadius);
   const visibleBoundary = new Paper.Shape.Circle(center, boundaryRadius / 2);
-  visibleBoundary.fillColor = 'black';
+  visibleBoundary.fillColor = new Paper.Color(0.5, 0.5, 0.5, 0.5);
   const angleOffset = Math.random() * 360;
-  const angleDelta = 360 / ballData.count;
-  const balls = Array.from({ length: ballData.count }, (_, i) => {
-    const radius = Math.random() * 10 + boundaryRadius / 3;
+  const angleDelta = 360 / data.count;
+
+  const balls = Array.from({ length: data.count }, (_, i) => {
+    const radius = Math.random() * 50 + boundaryRadius / 5;
     const speed = Math.random() * 5 + 5;
     const launchAngle = angleOffset + i * angleDelta;
-    const ball = new Paper.Shape.Circle({
+    const raster = new Paper.Raster({
+      source: data.images[i],
       position: center,
+    });
+    raster.scaling = radius * 2 / raster.width;
+    const ball = new Paper.Group({
+      children: [new Paper.Shape.Circle(center, radius), raster],
+      clipped: true,
       radius: radius,
       opacity: 0,
-      fillColor: new Paper.Color(Math.random(), Math.random(), Math.random()),
       velocity: new Paper.Point(speed * Math.cos((launchAngle * Math.PI) / 180), speed * Math.sin((launchAngle * Math.PI) / 180)),
       mass: radius
     });
@@ -22,7 +28,7 @@ export const setupBalls = (center, boundaryRadius, ballData) => {
   });
 
   const ballGroup = new Paper.Group({
-    children: [invisibleBoundary, visibleBoundary, ...balls],
+    children: [boundary, visibleBoundary, ...balls],
     clipped: true
   });
 
@@ -37,6 +43,7 @@ export const animateBalls = (isActive, balls, boundary) => {
       ball.opacity = 1;
       ball.position = ball.position.add(ball.velocity);
 
+      // * boundary collision check
       if (boundary.position.getDistance(ball.position, true) >= Math.pow(boundary.radius - ball.radius, 2)) {
         let collisionNormal = ball.position.subtract(boundary.position).normalize();
         let collisionPoint = boundary.position.add(collisionNormal.multiply(boundary.radius));
@@ -48,6 +55,7 @@ export const animateBalls = (isActive, balls, boundary) => {
         }
       }
 
+      // * ball collision check
       for (let j = i + 1; j < balls.length; j++) {
         let otherBall = balls[j];
         let distance = ball.position.getDistance(otherBall.position);
