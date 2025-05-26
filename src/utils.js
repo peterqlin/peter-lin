@@ -15,14 +15,19 @@ export const setupBalls = (center, boundaryRadius, data) => {
       source: data.images[i],
       position: center,
     });
-    raster.scaling = radius * 2 / raster.width;
+    raster.onLoad = () => {
+      raster.scaling = radius * 2 / raster.width;
+    };
     const ball = new Paper.Group({
       children: [new Paper.Shape.Circle(center, radius), raster],
       clipped: true,
       radius: radius,
       opacity: 0,
       velocity: new Paper.Point(speed * Math.cos((launchAngle * Math.PI) / 180), speed * Math.sin((launchAngle * Math.PI) / 180)),
-      mass: radius
+      mass: radius,
+      onMouseDown: () => {
+        console.log('clicked ball', i);
+      }
     });
     return ball;
   });

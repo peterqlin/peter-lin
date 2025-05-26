@@ -30,9 +30,9 @@ const Canvas = props => {
           easing: 'easeInOutQuad'
         }
       );
-      setTimeout(() => {
-        isActive = false;
-      }, 10000);
+      // setTimeout(() => {
+      //   isActive = false;
+      // }, 10000);
     };
 
     Paper.view.onFrame = () => {
