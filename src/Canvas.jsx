@@ -15,24 +15,28 @@ const Canvas = props => {
 
     const data = props.data;
     let isActive = false;
-    const ballGroup = setupBalls(Paper.view.center, radius, data);
+    let clicked = false;
+    const ballGroup = setupBalls(Paper.view.bounds.center, radius, data);
     const boundary = ballGroup.children[0];
     const visibleBoundary = ballGroup.children[1];
     const balls = ballGroup.children.slice(2);
 
     ballGroup.onMouseDown = () => {
-      isActive = true;
-      visibleBoundary.tween(
-        { scaling: visibleBoundary.scaling },
-        { scaling: 2 },
-        {
-          duration: 300,
-          easing: 'easeInOutQuad'
-        }
-      );
-      // setTimeout(() => {
-      //   isActive = false;
-      // }, 10000);
+      if (!clicked) {
+        clicked = true;
+        isActive = true;
+        visibleBoundary.tween(
+          { scaling: visibleBoundary.scaling },
+          { scaling: 2 },
+          {
+            duration: 300,
+            easing: 'easeInOutQuad'
+          }
+        );
+        setTimeout(() => {
+          isActive = false;
+        }, 20000);
+      }
     };
 
     Paper.view.onFrame = () => {

@@ -25,6 +25,27 @@ export const setupBalls = (center, boundaryRadius, data) => {
       opacity: 0,
       velocity: new Paper.Point(speed * Math.cos((launchAngle * Math.PI) / 180), speed * Math.sin((launchAngle * Math.PI) / 180)),
       mass: radius,
+      applyMatrix: false,
+      onMouseEnter: () => {
+        ball.tween(
+          { scaling: ball.scaling },
+          { scaling: 1.2 },
+          {
+            duration: 300,
+            easing: "easeInOutQuad"
+          }
+        );
+      },
+      onMouseLeave: () => {
+        ball.tween(
+          { scaling: ball.scaling },
+          { scaling: 1 },
+          {
+            duration: 300,
+            easing: "easeInOutQuad"
+          }
+        );
+      },
       onMouseDown: () => {
         console.log('clicked ball', i);
       }
@@ -48,17 +69,26 @@ export const animateBalls = (isActive, balls, boundary) => {
       ball.opacity = 1;
       ball.position = ball.position.add(ball.velocity);
 
-      // * boundary collision check
+      // * circular boundary collision check
       if (boundary.position.getDistance(ball.position, true) >= Math.pow(boundary.radius - ball.radius, 2)) {
         let collisionNormal = ball.position.subtract(boundary.position).normalize();
         let collisionPoint = boundary.position.add(collisionNormal.multiply(boundary.radius));
         ball.position = collisionPoint.subtract(collisionNormal.multiply(ball.radius));
         let dotProduct = ball.velocity.dot(collisionNormal);
         if (dotProduct > 0) {
-          const restitution = 0.8;
+          const restitution = 0.85;
           ball.velocity = ball.velocity.subtract(collisionNormal.multiply(2 * dotProduct * restitution));
         }
       }
+
+      // * screen boundary collision check
+      if (ball.position.x - ball.radius < 0 || ball.position.x + ball.radius > Paper.view.size.width) {
+        ball.velocity.x *= -1;
+      }
+      if (ball.position.y - ball.radius < 0 || ball.position.y + ball.radius > Paper.view.size.height) {
+        ball.velocity.y *= -1;
+      }
+
 
       // * ball collision check
       for (let j = i + 1; j < balls.length; j++) {
@@ -70,7 +100,7 @@ export const animateBalls = (isActive, balls, boundary) => {
           let relativeVelocity = otherBall.velocity.subtract(ball.velocity);
           let velocityAlongNormal = relativeVelocity.dot(collisionNormal);
           if (velocityAlongNormal > 0) continue;
-          let restitution = 0.8;
+          let restitution = 0.85;
           let impulse = (-(1 + restitution) * velocityAlongNormal) / (1 / ball.mass + 1 / otherBall.mass);
           let impulseVector = collisionNormal.multiply(impulse);
           ball.velocity = ball.velocity.subtract(impulseVector.multiply(1 / ball.mass));
