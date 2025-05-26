@@ -1,10 +1,13 @@
-import React, { useRef, useEffect } from 'react';
+import { useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router';
 import Paper from 'paper';
 import './Canvas.css';
 import { setupBalls, animateBalls } from './utils';
 
 const Canvas = props => {
   const canvasRef = useRef(null);
+  const navigate = useNavigate();
+  const pages = ['about', 'projects'];
 
   useEffect(() => {
     Paper.setup(canvasRef.current);
@@ -20,6 +23,12 @@ const Canvas = props => {
     const boundary = ballGroup.children[0];
     const visibleBoundary = ballGroup.children[1];
     const balls = ballGroup.children.slice(2);
+
+    for (let i = 0; i < balls.length; i++) {
+      balls[i].onClick = () => {
+        navigate(pages[i]);
+      };
+    }
 
     ballGroup.onMouseDown = () => {
       if (!clicked) {

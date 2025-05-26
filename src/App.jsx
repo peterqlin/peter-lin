@@ -1,20 +1,15 @@
-import Canvas from './Canvas';
-import './App.css';
+import { Routes, Route } from 'react-router-dom';
+import Home from './Home';
+import About from './About';
+import Projects from './Projects';
 
 function App() {
-  const data1 = {
-    count: 5,
-    images: ['peter0.jpg', 'peter1.jpg', 'peter2.jpg', 'peter3.jpg', 'peter4.jpg']
-  };
-  const data2 = {
-    count: 0,
-    images: []
-  };
   return (
-    <div id="canvas-container">
-      <Canvas id={1} data={data1} />
-      <Canvas id={2} data={data2} />
-    </div>
+    <Routes>
+      <Route path="/" element={<Home />} />
+      <Route path="/about" element={<About />} />
+      <Route path="/projects" element={<Projects />} />
+    </Routes>
   );
 }
 

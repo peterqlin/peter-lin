@@ -12,7 +12,9 @@
   "dependencies": {
     "paper": "^0.12.18",
     "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "react-dom": "^18.3.1",
+    "react-router": "^7.6.1",
+    "react-router-dom": "^7.6.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.15.0",

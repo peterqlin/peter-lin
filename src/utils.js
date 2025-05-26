@@ -45,9 +45,6 @@ export const setupBalls = (center, boundaryRadius, data) => {
             easing: "easeInOutQuad"
           }
         );
-      },
-      onMouseDown: () => {
-        console.log('clicked ball', i);
       }
     });
     return ball;
