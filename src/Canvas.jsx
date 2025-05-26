@@ -25,8 +25,33 @@ const Canvas = props => {
     const balls = ballGroup.children.slice(2);
 
     for (let i = 0; i < balls.length; i++) {
-      balls[i].onClick = () => {
+      const ball = balls[i];
+      const text = ball.children[2];
+      text.content = 'hello world';
+      text.position = text.position.subtract(new Paper.Point(text.bounds.width / 2, 0));
+      text.scaling = 0.01;
+      ball.onClick = () => {
         navigate(pages[i]);
+      };
+      ball.onMouseEnter = () => {
+        text.tween(
+          { scaling: text.scaling },
+          { scaling: 1 },
+          {
+            duration: 300,
+            easing: 'easeInOutQuad'
+          }
+        );
+      };
+      ball.onMouseLeave = () => {
+        text.tween(
+          { scaling: text.scaling },
+          { scaling: 0.01 },
+          {
+            duration: 300,
+            easing: 'easeInOutQuad'
+          }
+        );
       };
     }
 

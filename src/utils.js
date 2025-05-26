@@ -18,8 +18,17 @@ export const setupBalls = (center, boundaryRadius, data) => {
     raster.onLoad = () => {
       raster.scaling = radius * 2 / raster.width;
     };
+    const text = new Paper.PointText({
+      point: center,
+      content: 'buh',
+      fillColor: 'black',
+      fontFamily: 'Courier New',
+      fontWeight: 'bold',
+      fontSize: radius / 4,
+      applyMatrix: false
+    });
     const ball = new Paper.Group({
-      children: [new Paper.Shape.Circle(center, radius), raster],
+      children: [new Paper.Shape.Circle(center, radius), raster, text],
       clipped: true,
       radius: radius,
       opacity: 0,
