@@ -2,15 +2,12 @@ import React, { useEffect, useRef, useState } from "react";
 
 function PaperCanvas() {
   const canvasRef = useRef(null);
-  const animationRef = useRef(null);
   const [isLoaded, setIsLoaded] = useState(false);
   const [error, setError] = useState(null);
   const [hasCompleted, setHasCompleted] = useState(false);
 
   useEffect(() => {
     if (!canvasRef.current) return;
-
-    console.log("Initializing Paper.js canvas...", { hasCompleted });
 
     // Check if Paper.js is available globally
     if (typeof window.paper === "undefined") {
@@ -20,356 +17,398 @@ function PaperCanvas() {
 
     const paper = window.paper;
 
-    // Constants
-    const MIN_RADIUS = 8;
-    const ANIMATION_DURATION = 300;
-    const INITIAL_ANIMATION_DURATION = 500;
-    const SCALE_BUFFER = 1.05;
+    // Animation constants
+    const MIN_SQUARE_SIZE = 16;
+    const SQUARE_SPLIT_ANIMATION_DURATION = 300;
+    const INITIAL_SQUARE_ANIMATION_DURATION = 500;
+    const IMAGE_SCALE_BUFFER = 1.05;
+    const SQUARE_CORNER_RADIUS = 0.15; // Rounded corners (15% of square size)
 
     try {
       // Initialize Paper.js
       paper.setup(canvasRef.current);
       paper.view.viewSize = new paper.Size(800, 800);
-      console.log("Paper.js initialized successfully");
 
       // Image setup
-      const raster = new paper.Raster("peter_lin_portrait.jpg");
-      let isImageLoaded = false;
+      const portraitImage = new paper.Raster("peter_lin_portrait.jpg");
+      let isPortraitLoaded = false;
 
-      // Hide raster immediately to prevent it from showing enlarged
-      raster.visible = false;
+      // Hide portrait immediately to prevent it from showing enlarged
+      portraitImage.visible = false;
 
-      // State management
-      let totalBubbles = 0;
-      let completedBubbles = 0;
-      let finalImage = null;
-      let activeBubbles = new Set();
-      let isCleaningUp = false;
-      let completionTimeout = null;
+      // Animation state management
+      let totalSquaresToCreate = 0;
+      let squaresCompleted = 0;
+      let finalPortraitOverlay = null;
+      let activeSquares = new Set();
+      let isAnimationFinishing = false;
+      let finalImageTimeout = null;
       let isComponentMounted = true;
-      let animationCompleted = hasCompleted; // Track completion within this effect
+      let hasAnimationCompleted = hasCompleted; // Track completion within this effect
 
-      raster.on("load", () => {
-        isImageLoaded = true;
-        console.log("Raster loaded, animationCompleted:", animationCompleted);
-        // Ensure raster is still hidden
-        raster.visible = false;
+      portraitImage.on("load", () => {
+        isPortraitLoaded = true;
+        // Ensure portrait is still hidden
+        portraitImage.visible = false;
 
         // If animation has completed in this component lifecycle, show final image immediately
-        if (animationCompleted) {
-          console.log("Showing final image immediately");
-          showFinalImageImmediately();
+        if (hasAnimationCompleted) {
+          showFinalPortraitImmediately();
         } else {
-          console.log("Starting animation");
-          init();
+          startSquareAnimation();
         }
       });
 
       // Helper function to show final image immediately (for returning users)
-      function showFinalImageImmediately() {
-        if (finalImage || isCleaningUp || !isComponentMounted) return;
+      function showFinalPortraitImmediately() {
+        if (finalPortraitOverlay || isAnimationFinishing || !isComponentMounted)
+          return;
 
-        isCleaningUp = true;
+        isAnimationFinishing = true;
         setIsLoaded(true);
 
-        // Ensure raster is hidden
-        raster.visible = false;
+        // Ensure portrait is hidden
+        portraitImage.visible = false;
 
-        // Setup view and raster positioning (same as in init function)
-        const viewSize = 800;
-        const width = Math.pow(2, Math.floor(Math.log2(viewSize)));
-        const fitScreenScaleFactor = Math.max(
-          viewSize / raster.width,
-          viewSize / raster.height
+        // Setup view and portrait positioning (same as in startSquareAnimation function)
+        const canvasSize = 800;
+        const powerOfTwoSize = Math.pow(2, Math.floor(Math.log2(canvasSize)));
+        const portraitFitScale = Math.max(
+          canvasSize / portraitImage.width,
+          canvasSize / portraitImage.height
         );
-        const scaleFactor = Math.min(
-          (SCALE_BUFFER * width) / viewSize,
-          (SCALE_BUFFER * width) / viewSize
+        const finalScaleFactor = Math.min(
+          (IMAGE_SCALE_BUFFER * powerOfTwoSize) / canvasSize,
+          (IMAGE_SCALE_BUFFER * powerOfTwoSize) / canvasSize
         );
 
-        paper.view.viewSize = new paper.Size(width, width);
-        raster.position = new paper.Point(width / 2, width / 2);
-        raster.scale(fitScreenScaleFactor * scaleFactor);
+        paper.view.viewSize = new paper.Size(powerOfTwoSize, powerOfTwoSize);
+        portraitImage.position = new paper.Point(
+          powerOfTwoSize / 2,
+          powerOfTwoSize / 2
+        );
+        portraitImage.scale(portraitFitScale * finalScaleFactor);
 
         // Create and show final image immediately with proper positioning
-        finalImage = raster.clone();
-        finalImage.visible = true;
-        finalImage.opacity = 1;
-        finalImage.position = new paper.Point(width / 2, width / 2);
-        finalImage.scale(fitScreenScaleFactor * scaleFactor);
-        finalImage.sendToBack();
+        finalPortraitOverlay = portraitImage.clone();
+        finalPortraitOverlay.visible = true;
+        finalPortraitOverlay.opacity = 1;
+        finalPortraitOverlay.position = new paper.Point(
+          powerOfTwoSize / 2,
+          powerOfTwoSize / 2
+        );
+        finalPortraitOverlay.scale(portraitFitScale * finalScaleFactor);
+        finalPortraitOverlay.sendToBack();
 
-        // Clean up any existing bubbles
-        const bubblesToRemove = Array.from(activeBubbles);
-        bubblesToRemove.forEach((bubble) => {
-          if (bubble && bubble.remove) bubble.remove();
+        // Clean up any existing squares
+        const squaresToRemove = Array.from(activeSquares);
+        squaresToRemove.forEach((squareGroup) => {
+          if (squareGroup && squareGroup.remove) squareGroup.remove();
         });
-        activeBubbles.clear();
+        activeSquares.clear();
 
         // Final cleanup
         paper.project.activeLayer.children.slice().forEach((child) => {
-          if (child instanceof paper.Path.Circle) child.remove();
+          if (child instanceof paper.Path.Rectangle) child.remove();
         });
       }
 
-      // Helper function to create animated circle
-      function createAnimatedCircle(
+      // Helper function to create rounded square
+      function createRoundedSquare(
         center,
-        radius,
+        size,
         fillColor,
         targetPosition = null
       ) {
         if (!isComponentMounted) return null;
 
-        const circle = new paper.Path.Circle({
-          center: center,
-          radius: radius,
-          fillColor: fillColor,
-          applyMatrix: false,
-        });
+        // Create a wrapper group to contain the margin and the actual square
+        const squareGroup = new paper.Group();
 
-        activeBubbles.add(circle);
+        // Create an invisible square for margin (slightly larger than the actual square)
+        const marginSize = size * 1.1; // 10% larger for margin
+        const marginRect = new paper.Rectangle(
+          center.subtract(marginSize / 2),
+          new paper.Size(marginSize, marginSize)
+        );
+        const marginSquare = new paper.Path.Rectangle(marginRect);
+        marginSquare.fillColor = new paper.Color(0, 0, 0, 0); // Transparent
+        marginSquare.applyMatrix = false;
+
+        // Create the actual rounded square (smaller to create visual gap)
+        const squareSize = size * 0.98;
+        const rect = new paper.Rectangle(
+          center.subtract(squareSize / 2),
+          new paper.Size(squareSize, squareSize)
+        );
+
+        const roundedSquare = new paper.Path.Rectangle(
+          rect,
+          new paper.Size(
+            squareSize * SQUARE_CORNER_RADIUS,
+            squareSize * SQUARE_CORNER_RADIUS
+          )
+        );
+        roundedSquare.fillColor = fillColor;
+        roundedSquare.applyMatrix = false;
+
+        // Add both elements to the wrapper group
+        squareGroup.addChild(marginSquare);
+        squareGroup.addChild(roundedSquare);
+        squareGroup.applyMatrix = false;
+
+        activeSquares.add(squareGroup);
 
         if (targetPosition) {
-          circle.tweenTo(
+          squareGroup.tweenTo(
             { position: targetPosition },
             {
-              duration: ANIMATION_DURATION,
+              duration: SQUARE_SPLIT_ANIMATION_DURATION,
               easing: "easeInOutQuad",
             }
           );
         }
 
-        return circle;
+        return squareGroup;
       }
 
       // Helper function to get average color for a region
       function getAverageColorForRegion(center, radius) {
-        // Temporarily make raster visible to get average color, then hide it
-        raster.visible = true;
-        const rect = new paper.Rectangle(
+        // Temporarily make portrait visible to get average color, then hide it
+        portraitImage.visible = true;
+        const regionRect = new paper.Rectangle(
           center.subtract([radius, radius]),
           new paper.Size(radius * 2, radius * 2)
         );
-        const color = raster.getAverageColor(rect);
-        raster.visible = false;
-        return color;
+        const averageColor = portraitImage.getAverageColor(regionRect);
+        portraitImage.visible = false;
+        return averageColor;
       }
 
-      // Helper function to create temporary fade-out circle
-      function createTempCircle(center, radius, fillColor) {
+      // Helper function to create temporary fade-out square
+      function createTemporaryFadeSquare(center, size, fillColor) {
         if (!isComponentMounted) return;
 
-        const tempCircle = createAnimatedCircle(center, radius, fillColor);
-        if (!tempCircle) return;
+        const tempSquare = createRoundedSquare(center, size, fillColor);
+        if (!tempSquare) return;
 
-        tempCircle.tweenTo(
+        tempSquare.tweenTo(
           { opacity: 0 },
           {
-            duration: ANIMATION_DURATION,
+            duration: SQUARE_SPLIT_ANIMATION_DURATION,
             easing: "easeInOutQuad",
           }
         );
 
         setTimeout(() => {
           if (!isComponentMounted) return;
-          tempCircle.remove();
-          activeBubbles.delete(tempCircle);
-        }, ANIMATION_DURATION);
+          tempSquare.remove();
+          activeSquares.delete(tempSquare);
+        }, SQUARE_SPLIT_ANIMATION_DURATION);
       }
 
-      // Function to handle bubble splitting
-      function scheduleBubbleSplit(center, radius, bubble = null) {
+      // Function to handle square splitting
+      function scheduleSquareSplit(center, size, squareGroup = null) {
         if (
           !isComponentMounted ||
-          !isImageLoaded ||
-          radius < MIN_RADIUS ||
-          isCleaningUp
+          !isPortraitLoaded ||
+          size < MIN_SQUARE_SIZE * 2 ||
+          isAnimationFinishing
         ) {
-          completedBubbles++;
-          checkForCompletion();
+          squaresCompleted++;
+          checkForAnimationCompletion();
           return;
         }
 
         // Calculate split delay
-        const baseDelay = 500;
-        const maxRadius = 764;
-        const delayScale = Math.pow(radius / maxRadius, 2) + 0.8;
-        const splitDelay = Math.random() * 500 + baseDelay * delayScale;
+        const baseSplitDelay = 500;
+        const maxSquareSize = 764;
+        const delayScaleFactor = Math.pow(size / maxSquareSize, 2) + 0.8;
+        const splitDelay =
+          Math.random() * 500 + baseSplitDelay * delayScaleFactor;
 
         setTimeout(() => {
           if (
             !isComponentMounted ||
-            !isImageLoaded ||
-            radius < MIN_RADIUS ||
-            isCleaningUp
+            !isPortraitLoaded ||
+            size < MIN_SQUARE_SIZE * 2 ||
+            isAnimationFinishing
           )
             return;
 
-          // Remove original bubble
-          if (bubble) {
-            bubble.remove();
-            activeBubbles.delete(bubble);
+          // Remove original square
+          if (squareGroup) {
+            squareGroup.remove();
+            activeSquares.delete(squareGroup);
           }
 
-          // Create temporary fade-out circle
-          createTempCircle(
+          // Create temporary fade-out square
+          createTemporaryFadeSquare(
             center,
-            radius,
-            getAverageColorForRegion(center, radius)
+            size,
+            getAverageColorForRegion(center, size / 2)
           );
 
-          // Create new bubbles
-          const newRadius = radius / 2;
-          const offset = new paper.Point(newRadius, newRadius);
-          const positions = [
-            center.add(offset.multiply(-1, -1)),
-            center.add(offset.multiply(-1, 1)),
-            center.add(offset.multiply(1, -1)),
-            center.add(offset.multiply(1, 1)),
+          // Create new squares that form a perfect 2x2 grid
+          const newSquareSize = size / 2; // Each square is exactly half the size
+
+          // Position squares to form a perfect grid without gaps
+          const newSquarePositions = [
+            center.add([-newSquareSize / 2, -newSquareSize / 2]), // Top-left
+            center.add([newSquareSize / 2, -newSquareSize / 2]), // Top-right
+            center.add([-newSquareSize / 2, newSquareSize / 2]), // Bottom-left
+            center.add([newSquareSize / 2, newSquareSize / 2]), // Bottom-right
           ];
 
-          positions.forEach((pos) => {
-            const circle = createAnimatedCircle(
+          newSquarePositions.forEach((position) => {
+            const newSquareGroup = createRoundedSquare(
               center,
-              newRadius,
-              getAverageColorForRegion(pos, newRadius),
-              pos
+              newSquareSize,
+              getAverageColorForRegion(position, newSquareSize / 2),
+              position
             );
-            if (circle) {
-              scheduleBubbleSplit(pos, newRadius, circle);
+            if (newSquareGroup) {
+              scheduleSquareSplit(position, newSquareSize, newSquareGroup);
             }
           });
         }, splitDelay);
       }
 
       // Check completion and show final image
-      function checkForCompletion() {
-        if (completedBubbles >= totalBubbles && totalBubbles > 0) {
-          if (completionTimeout) clearTimeout(completionTimeout);
-          completionTimeout = setTimeout(showFinalImage, 300);
+      function checkForAnimationCompletion() {
+        if (
+          squaresCompleted >= totalSquaresToCreate &&
+          totalSquaresToCreate > 0
+        ) {
+          if (finalImageTimeout) clearTimeout(finalImageTimeout);
+          finalImageTimeout = setTimeout(showFinalPortrait, 300);
         }
       }
 
       // Show the final image overlay
-      function showFinalImage() {
-        if (finalImage || isCleaningUp || !isComponentMounted) return;
+      function showFinalPortrait() {
+        if (finalPortraitOverlay || isAnimationFinishing || !isComponentMounted)
+          return;
 
-        console.log("Showing final image");
-
-        if (completionTimeout) {
-          clearTimeout(completionTimeout);
-          completionTimeout = null;
+        if (finalImageTimeout) {
+          clearTimeout(finalImageTimeout);
+          finalImageTimeout = null;
         }
 
-        isCleaningUp = true;
-        animationCompleted = true;
+        isAnimationFinishing = true;
+        hasAnimationCompleted = true;
         setHasCompleted(true);
 
         // Create and fade in final image
-        finalImage = raster.clone();
-        finalImage.visible = true;
-        finalImage.opacity = 0;
-        finalImage.sendToBack();
-        finalImage.tweenTo(
+        finalPortraitOverlay = portraitImage.clone();
+        finalPortraitOverlay.visible = true;
+        finalPortraitOverlay.opacity = 0;
+        finalPortraitOverlay.sendToBack();
+        finalPortraitOverlay.tweenTo(
           { opacity: 1 },
           {
-            duration: 400,
+            duration: 500,
             easing: "easeInOutQuad",
           }
         );
 
-        // Fade out bubbles after image appears
+        // Fade out squares after image appears
         setTimeout(() => {
           if (!isComponentMounted) return;
 
-          const bubblesToFade = Array.from(activeBubbles);
-          if (bubblesToFade.length > 0) {
-            bubblesToFade.forEach((bubble) => {
-              if (bubble && bubble.tweenTo) {
-                bubble.tweenTo(
+          const squaresToFadeOut = Array.from(activeSquares);
+          if (squaresToFadeOut.length > 0) {
+            squaresToFadeOut.forEach((squareGroup) => {
+              if (squareGroup && squareGroup.tweenTo) {
+                squareGroup.tweenTo(
                   { opacity: 0 },
                   {
-                    duration: 800,
+                    duration: 300,
                     easing: "easeInOutQuad",
                   }
                 );
               }
             });
 
-            // Clean up bubbles
+            // Clean up squares
             setTimeout(() => {
               if (!isComponentMounted) return;
 
-              bubblesToFade.forEach((bubble) => {
-                if (bubble && bubble.remove) bubble.remove();
+              squaresToFadeOut.forEach((squareGroup) => {
+                if (squareGroup && squareGroup.remove) squareGroup.remove();
               });
-              activeBubbles.clear();
+              activeSquares.clear();
 
               // Final cleanup
               paper.project.activeLayer.children.slice().forEach((child) => {
-                if (child instanceof paper.Path.Circle) child.remove();
+                if (child instanceof paper.Path.Rectangle) child.remove();
               });
-            }, 800);
+            }, 300);
           }
-        }, 400);
+        }, 200);
       }
 
-      function init() {
+      function startSquareAnimation() {
         if (!isComponentMounted) return;
 
-        console.log("Initializing animation");
-
         // Calculate dimensions - make it square
-        const viewSize = 800;
-        const width = Math.pow(2, Math.floor(Math.log2(viewSize)));
-        const radius = width / 2;
+        const canvasSize = 800;
+        const powerOfTwoSize = Math.pow(2, Math.floor(Math.log2(canvasSize)));
+        const initialSquareSize = powerOfTwoSize; // Use full width for initial square
 
-        // Calculate total bubbles
-        let currentRadius = radius;
-        let level = 0;
-        totalBubbles = 0;
-        while (currentRadius >= MIN_RADIUS) {
-          totalBubbles += Math.pow(4, level);
-          currentRadius /= 2;
-          level++;
+        // Calculate total squares
+        let currentSquareSize = initialSquareSize;
+        let splitLevel = 0;
+        totalSquaresToCreate = 0;
+        while (currentSquareSize >= MIN_SQUARE_SIZE * 2) {
+          totalSquaresToCreate += Math.pow(4, splitLevel);
+          currentSquareSize = currentSquareSize / 2; // Each square splits into 4 squares of half size
+          splitLevel++;
         }
 
-        console.log("Total bubbles to create:", totalBubbles);
-
-        // Setup view and raster
-        const fitScreenScaleFactor = Math.max(
-          viewSize / raster.width,
-          viewSize / raster.height
+        // Setup view and portrait
+        const portraitFitScale = Math.max(
+          canvasSize / portraitImage.width,
+          canvasSize / portraitImage.height
         );
-        const scaleFactor = Math.min(
-          (SCALE_BUFFER * width) / viewSize,
-          (SCALE_BUFFER * width) / viewSize
+        const finalScaleFactor = Math.min(
+          (IMAGE_SCALE_BUFFER * powerOfTwoSize) / canvasSize,
+          (IMAGE_SCALE_BUFFER * powerOfTwoSize) / canvasSize
         );
 
-        paper.view.viewSize = new paper.Size(width, width);
-        raster.position = new paper.Point(width / 2, width / 2);
-        raster.scale(fitScreenScaleFactor * scaleFactor);
+        paper.view.viewSize = new paper.Size(powerOfTwoSize, powerOfTwoSize);
+        portraitImage.position = new paper.Point(
+          powerOfTwoSize / 2,
+          powerOfTwoSize / 2
+        );
+        portraitImage.scale(portraitFitScale * finalScaleFactor);
 
-        // Temporarily make raster visible to get average color, then hide it
-        raster.visible = true;
-        const averageColor = raster.getAverageColor(paper.view.bounds);
-        raster.visible = false;
+        // Temporarily make portrait visible to get average color, then hide it
+        portraitImage.visible = true;
+        const overallAverageColor = portraitImage.getAverageColor(
+          paper.view.bounds
+        );
+        portraitImage.visible = false;
 
-        // Create initial circle
-        const center = paper.view.bounds.center;
-        const circle = createAnimatedCircle(center, radius, averageColor);
+        // Create initial square
+        const canvasCenter = paper.view.bounds.center;
+        const initialSquareGroup = createRoundedSquare(
+          canvasCenter,
+          initialSquareSize,
+          overallAverageColor
+        );
 
-        if (!circle) return;
+        if (!initialSquareGroup) return;
 
-        console.log("Created initial circle, starting animation");
+        // Set initial state for animation
+        initialSquareGroup.opacity = 0;
+        initialSquareGroup.scaling = 0.0001;
 
         // Initial animation
-        circle.tween(
-          { opacity: 0, scaling: 0.0001 },
+        initialSquareGroup.tweenTo(
           { opacity: 1, scaling: 1 },
           {
-            duration: INITIAL_ANIMATION_DURATION,
+            duration: INITIAL_SQUARE_ANIMATION_DURATION,
             easing: "easeInOutQuad",
           }
         );
@@ -378,33 +417,33 @@ function PaperCanvas() {
         setTimeout(() => {
           if (!isComponentMounted) return;
 
-          console.log("Starting bubble splitting");
-          scheduleBubbleSplit(center, radius, circle);
+          scheduleSquareSplit(
+            canvasCenter,
+            initialSquareSize,
+            initialSquareGroup
+          );
           // Safety timeout
-          completionTimeout = setTimeout(() => {
+          finalImageTimeout = setTimeout(() => {
             if (!isComponentMounted) return;
-            if (!finalImage && !isCleaningUp) {
-              console.log("Forcing completion due to timeout");
-              showFinalImage();
+            if (!finalPortraitOverlay && !isAnimationFinishing) {
+              showFinalPortrait();
             }
           }, 10000);
-        }, INITIAL_ANIMATION_DURATION);
+        }, INITIAL_SQUARE_ANIMATION_DURATION);
 
         setIsLoaded(true);
       }
 
       // Cleanup function
       return () => {
-        console.log("Cleaning up Paper.js...");
         isComponentMounted = false;
 
-        if (completionTimeout) {
-          clearTimeout(completionTimeout);
+        if (finalImageTimeout) {
+          clearTimeout(finalImageTimeout);
         }
 
         // Force completion if animation is still running (user navigated away)
-        if (!animationCompleted && !finalImage) {
-          console.log("Forcing completion on navigation");
+        if (!hasAnimationCompleted && !finalPortraitOverlay) {
           setHasCompleted(true);
         }
 
@@ -420,7 +459,7 @@ function PaperCanvas() {
       console.error("Paper.js initialization error:", error);
       setError(error.message);
     }
-  }, []); // Removed resetKey from dependencies since we no longer need it
+  }, []);
 
   if (error) {
     return (
