@@ -1,93 +1,93 @@
-import React, { useRef, useEffect, useState } from "react";
+import React from "react";
 
 const AnimatedText = ({ text, className = "" }) => {
-  const textRef = useRef(null);
-  const [letterPositions, setLetterPositions] = useState([]);
-  const [isReady, setIsReady] = useState(false);
-  const [letterSpacing, setLetterSpacing] = useState("normal");
+  // Character-specific spacing map (in pixels)
+  const charSpacing = {
+    // Uppercase letters
+    H: 60,
+    I: 20,
+    P: 45,
+    E: 50,
+    T: 45,
+    R: 50,
+    L: 40,
+    N: 55,
+    // Lowercase letters
+    h: 45,
+    i: 20,
+    p: 45,
+    e: 45,
+    t: 25,
+    r: 35,
+    l: 25,
+    n: 40,
+    // Special characters
+    ",": 25,
+    "'": 20,
+    " ": 20,
+    // Default for any other characters
+    default: 45,
+  };
 
-  useEffect(() => {
-    if (!textRef.current) return;
+  // Function to get spacing for a character
+  const getCharSpacing = (char) => {
+    return charSpacing[char] || charSpacing["default"];
+  };
 
-    // Get the computed letter-spacing
-    const computedStyle = window.getComputedStyle(textRef.current);
-    setLetterSpacing(computedStyle.letterSpacing);
+  // Split text into lines first, then characters
+  const lines = text.split("\n");
+  const characters = [];
+  let globalIndex = 1;
+  let maxWidth = 0;
+  const lineHeights = [];
 
-    // Create a temporary span to measure text
-    const tempSpan = document.createElement("span");
-    tempSpan.style.font = computedStyle.font;
-    tempSpan.style.letterSpacing = computedStyle.letterSpacing;
-    tempSpan.style.visibility = "hidden";
-    tempSpan.style.position = "absolute";
-    tempSpan.style.whiteSpace = "pre";
-    document.body.appendChild(tempSpan);
-
-    const lines = text.split("\n");
-    const positions = [];
-    let letterIndex = 1;
-
-    lines.forEach((line, lineIndex) => {
-      let currentX = 0;
-      const lineLetters = [];
-
-      line.split("").forEach((letter, charIndex) => {
-        if (letter === " ") {
-          tempSpan.textContent = " ";
-          const spaceWidth = tempSpan.getBoundingClientRect().width;
-          lineLetters.push({
-            letter: " ",
-            x: currentX,
-            letterIndex: letterIndex++,
-            lineIndex,
-          });
-          currentX += spaceWidth;
-        } else {
-          tempSpan.textContent = letter;
-          const letterWidth = tempSpan.getBoundingClientRect().width;
-          lineLetters.push({
-            letter,
-            x: currentX,
-            letterIndex: letterIndex++,
-            lineIndex,
-          });
-          currentX += letterWidth;
-        }
+  lines.forEach((line, lineIndex) => {
+    let currentX = 0;
+    line.split("").forEach((char, charIndex) => {
+      characters.push({
+        char: char === " " ? "\u00A0" : char,
+        index: globalIndex++,
+        lineIndex,
+        x: currentX,
       });
 
-      positions.push(...lineLetters);
+      // Use custom spacing for this character
+      currentX += getCharSpacing(char);
     });
 
-    document.body.removeChild(tempSpan);
-    setLetterPositions(positions);
-    setIsReady(true);
-  }, [text]);
+    // Track the width of each line
+    lineHeights.push(currentX);
+    maxWidth = Math.max(maxWidth, currentX);
+  });
 
-  if (!isReady) {
-    return (
-      <div
-        ref={textRef}
-        className={className}
-        style={{ visibility: "hidden", position: "absolute" }}
-      >
-        {text}
-      </div>
-    );
-  }
+  // Calculate SVG dimensions
+  const lineHeight = 1.2; // em units
+  const totalHeight = lines.length * lineHeight;
+  const fontSize = 72; // 4.5rem = 72px (assuming 16px base)
+  const emToPx = fontSize; // 1em = fontSize in pixels
+
+  // Convert em dimensions to pixels for viewBox
+  const svgWidth = maxWidth;
+  const svgHeight = totalHeight * emToPx;
+
+  // Calculate vertical positioning to center the entire text block
+  // Start from the top of the first line and center the whole block
+  const startY = lineHeight; // Start at the first line position
 
   return (
     <svg
       className={`animated-text ${className}`}
       style={{ overflow: "visible" }}
+      viewBox={`0 0 ${svgWidth} ${svgHeight}`}
     >
-      {letterPositions.map(({ letter, x, letterIndex, lineIndex }) => (
+      {characters.map(({ char, index, lineIndex, x }) => (
         <text
-          key={`${lineIndex}-${letterIndex}`}
-          x={x * 4.7}
-          y={lineIndex * 1.2 + "em"}
-          className={`letter letter-${letterIndex}`}
-          style={{ letterSpacing: letterSpacing }}
+          key={index}
+          x={x}
+          y={startY + lineIndex * lineHeight + "em"}
+          className={`letter letter-${index}`}
         >
-          {letter === " " ? "\u00A0" : letter}
+          {char}
         </text>
       ))}
     </svg>
