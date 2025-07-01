@@ -20,7 +20,7 @@ function PaperCanvas() {
     // Animation constants
     const MIN_SQUARE_SIZE = 16;
     const SQUARE_SPLIT_ANIMATION_DURATION = 300;
-    const INITIAL_SQUARE_ANIMATION_DURATION = 500;
+    const INITIAL_SQUARE_ANIMATION_DURATION = 3000;
     const IMAGE_SCALE_BUFFER = 1.05;
     const SQUARE_CORNER_RADIUS = 0.15; // Rounded corners (15% of square size)
 
@@ -221,11 +221,12 @@ function PaperCanvas() {
         }
 
         // Calculate split delay
+        const splitDelayRange = 500;
         const baseSplitDelay = 500;
         const maxSquareSize = 764;
         const delayScaleFactor = Math.pow(size / maxSquareSize, 2) + 0.8;
         const splitDelay =
-          Math.random() * 500 + baseSplitDelay * delayScaleFactor;
+          Math.random() * splitDelayRange + baseSplitDelay * delayScaleFactor;
 
         setTimeout(() => {
           if (
@@ -323,7 +324,7 @@ function PaperCanvas() {
                 squareGroup.tweenTo(
                   { opacity: 0 },
                   {
-                    duration: 300,
+                    duration: 800,
                     easing: "easeInOutQuad",
                   }
                 );
@@ -343,7 +344,7 @@ function PaperCanvas() {
               paper.project.activeLayer.children.slice().forEach((child) => {
                 if (child instanceof paper.Path.Rectangle) child.remove();
               });
-            }, 300);
+            }, 800);
           }
         }, 200);
       }
@@ -402,11 +403,10 @@ function PaperCanvas() {
 
         // Set initial state for animation
         initialSquareGroup.opacity = 0;
-        initialSquareGroup.scaling = 0.0001;
 
         // Initial animation
         initialSquareGroup.tweenTo(
-          { opacity: 1, scaling: 1 },
+          { opacity: 1 },
           {
             duration: INITIAL_SQUARE_ANIMATION_DURATION,
             easing: "easeInOutQuad",
