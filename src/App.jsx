@@ -4,7 +4,8 @@ import Footer from "./components/Footer";
 import Home from "./components/Home";
 import About from "./components/About";
 import Projects from "./components/Projects";
-import Reading from "./components/Reading";
+import Blog from "./components/Blog";
+import BlogPost from "./components/BlogPost";
 
 function App() {
   return (
@@ -17,7 +18,8 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/about" element={<About />} />
             <Route path="/projects" element={<Projects />} />
-            <Route path="/reading" element={<Reading />} />
+            <Route path="/blog" element={<Blog />} />
+            <Route path="/blog/:id" element={<BlogPost />} />
           </Routes>
         </main>
 

@@ -8,11 +8,11 @@ function Footer() {
   }, []);
 
   return (
-    <footer className="bg-gray-900 text-white py-12">
+    <footer className="bg-blue-50 text-gray-900 py-12">
       <div className="max-w-6xl mx-auto px-6">
         <div className="flex flex-col md:flex-row items-center justify-between">
           <div className="mb-4 md:mb-0">
-            <p className="text-gray-400">
+            <p className="text-gray-700">
               © {currentYear} Peter Lin. All rights reserved.
             </p>
           </div>
@@ -22,7 +22,7 @@ function Footer() {
               href="https://github.com/peterqlin"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-gray-400 hover:text-white transition-colors duration-200"
+              className="text-gray-700 hover:text-gray-900 transition-colors duration-200"
               aria-label="GitHub"
             >
               <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
@@ -34,7 +34,7 @@ function Footer() {
               href="https://www.linkedin.com/in/peter-q-lin/"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-gray-400 hover:text-white transition-colors duration-200"
+              className="text-gray-700 hover:text-gray-900 transition-colors duration-200"
               aria-label="LinkedIn"
             >
               <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
@@ -44,7 +44,7 @@ function Footer() {
 
             <a
               href="mailto:peter.lin2305@gmail.com"
-              className="text-gray-400 hover:text-white transition-colors duration-200"
+              className="text-gray-700 hover:text-gray-900 transition-colors duration-200"
               aria-label="Email"
             >
               <svg

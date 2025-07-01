@@ -34,6 +34,43 @@
   .card {
     @apply bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow duration-300;
   }
+
+  /* Blog Content Styles */
+  .prose {
+    @apply text-gray-800 leading-relaxed;
+  }
+
+  .prose h2 {
+    @apply text-2xl font-bold text-gray-900 mt-8 mb-4;
+  }
+
+  .prose h3 {
+    @apply text-xl font-semibold text-gray-900 mt-6 mb-3;
+  }
+
+  .prose p {
+    @apply mb-4;
+  }
+
+  .prose ul {
+    @apply mb-4 pl-6;
+  }
+
+  .prose li {
+    @apply mb-2;
+  }
+
+  .prose pre {
+    @apply bg-gray-100 p-4 rounded-lg overflow-x-auto mb-4;
+  }
+
+  .prose code {
+    @apply bg-gray-100 px-2 py-1 rounded text-sm font-mono;
+  }
+
+  .prose pre code {
+    @apply bg-transparent p-0;
+  }
 }
 
 /* Animated Text Effect */
@@ -41,7 +78,7 @@
   font-family: "Inter", sans-serif;
   letter-spacing: 2px;
   stroke: #3b82f6;
-  font-size: 3rem;
+  font-size: 4.5rem;
   font-weight: 700;
   stroke-width: 1;
   fill: rgba(59, 130, 246, 0);
@@ -55,12 +92,6 @@
   font-family: inherit;
   font-size: inherit;
   font-weight: inherit;
-}
-
-@media (min-width: 768px) {
-  .animated-text {
-    font-size: 4.5rem;
-  }
 }
 
 .letter {

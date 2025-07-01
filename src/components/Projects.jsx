@@ -12,7 +12,7 @@ function Projects() {
   ];
 
   return (
-    <section id="projects" className="min-h-screen py-20 bg-gray-50">
+    <section id="projects" className="min-h-screen py-20 bg-blue-50">
       <div className="max-w-6xl mx-auto px-6">
         <h2 className="section-title text-center">Projects</h2>
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">

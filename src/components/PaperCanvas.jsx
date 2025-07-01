@@ -475,25 +475,18 @@ function PaperCanvas() {
   }
 
   return (
-    <div className="flex items-center justify-center p-4 w-full">
-      <div
-        className="relative w-full max-w-md"
-        style={{ aspectRatio: "1 / 1" }}
-      >
-        <canvas
-          ref={canvasRef}
-          id="paper-canvas"
-          width={800}
-          height={800}
-          className="rounded-sm w-full h-full"
-          style={{
-            display: "block",
-            width: "100%",
-            height: "100%",
-            background: "transparent",
-          }}
-        />
-      </div>
+    <div className="w-full h-full flex items-center justify-center">
+      <canvas
+        ref={canvasRef}
+        id="paper-canvas"
+        width={800}
+        height={800}
+        className="rounded-sm object-contain max-w-full max-h-full"
+        style={{
+          display: "block",
+          background: "transparent",
+        }}
+      />
     </div>
   );
 }

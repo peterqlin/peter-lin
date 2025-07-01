@@ -8,11 +8,11 @@ function Header() {
     { id: "home", label: "Home", path: "/" },
     { id: "about", label: "About", path: "/about" },
     { id: "projects", label: "Projects", path: "/projects" },
-    { id: "reading", label: "Reading", path: "/reading" },
+    { id: "blog", label: "Blog", path: "/blog" },
   ];
 
   return (
-    <header className="bg-white shadow-sm sticky top-0 z-50">
+    <header className="bg-blue-50 z-50">
       <div className="max-w-6xl mx-auto px-6 py-4">
         <div className="flex items-center justify-between">
           <Link

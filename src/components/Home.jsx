@@ -4,21 +4,18 @@ import AnimatedText from "./AnimatedText";
 
 function Home() {
   return (
-    <section
-      id="home"
-      className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100"
-    >
-      <div className="text-center max-w-6xl mx-auto px-6">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
-          <div className="text-left">
-            <div className="mb-6 text-gray-900">
-              <AnimatedText text={`Hi, I'm\nPeter Lin`} />
-            </div>
+    <section id="home" className="h-screen bg-blue-50 relative overflow-hidden">
+      <div className="absolute inset-0 flex items-center justify-center py-4">
+        {/* Single container that holds both text and image as one unit */}
+        <div className="flex items-center justify-center gap-32 max-w-6xl mx-auto px-8">
+          {/* Text Section */}
+          <div className="text-gray-900 flex-shrink-0">
+            <AnimatedText text={`Hi, I'm\nPeter Lin`} />
           </div>
-          <div className="flex items-center justify-center w-full">
-            <div className="w-full max-w-md">
-              <PaperCanvas />
-            </div>
+
+          {/* Image Section - smaller, more appropriate size */}
+          <div className="w-120 h-120 flex-shrink-0">
+            <PaperCanvas />
           </div>
         </div>
       </div>
