@@ -20,11 +20,32 @@
 
 @layer components {
   .nav-link {
-    @apply text-gray-700 hover:text-blue-600 transition-colors duration-200 font-medium;
+    @apply text-gray-700 hover:text-blue-600 transition-colors duration-200 font-medium relative;
+    position: relative;
+  }
+
+  .nav-link::after {
+    content: "";
+    position: absolute;
+    bottom: -4px;
+    left: 50%;
+    width: 0;
+    height: 2px;
+    background-color: #3b82f6;
+    transition: all 0.3s ease;
+    transform: translateX(-50%);
+  }
+
+  .nav-link:hover::after {
+    width: 100%;
   }
 
   .nav-link.active {
     @apply text-blue-600;
+  }
+
+  .nav-link.active::after {
+    width: 100%;
   }
 
   .section-title {

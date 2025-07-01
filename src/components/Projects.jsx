@@ -2,20 +2,32 @@ import React from "react";
 
 function Projects() {
   const projects = [
-    {
-      title: "Project Title",
-      description:
-        "A brief description of your project. Explain what the project does, what problems it solves, and what makes it unique. Keep this concise but informative.",
-      tech: ["Technology 1", "Technology 2", "Technology 3", "Technology 4"],
-      link: "#",
-    },
+    // {
+    //   title: "Project Title",
+    //   description:
+    //     "A brief description of your project. Explain what the project does, what problems it solves, and what makes it unique. Keep this concise but informative.",
+    //   tech: ["Technology 1", "Technology 2", "Technology 3", "Technology 4"],
+    //   link: "#",
+    // },
   ];
 
   return (
     <section id="projects" className="min-h-screen py-20 bg-blue-50">
       <div className="max-w-6xl mx-auto px-6">
         <h2 className="section-title text-center">Projects</h2>
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+
+        {/* UNDER CONSTRUCTION SIGN */}
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="text-center">
+            <div className="text-8xl font-bold text-gray-400 mb-4">🚧</div>
+            <h3 className="text-4xl font-bold text-gray-600 mb-2">
+              UNDER CONSTRUCTION
+            </h3>
+          </div>
+        </div>
+
+        {/* Commented out project grid for now */}
+        {/* <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           {projects.map((project, index) => (
             <div key={index} className="card">
               <h3 className="text-xl font-semibold text-gray-900 mb-3">
@@ -42,7 +54,7 @@ function Projects() {
               </a>
             </div>
           ))}
-        </div>
+        </div> */}
       </div>
     </section>
   );
