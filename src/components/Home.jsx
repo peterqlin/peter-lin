@@ -1,5 +1,5 @@
 import React from "react";
-import PaperCanvas from "./PaperCanvas";
+import VideoCanvas from "./VideoCanvas";
 import AnimatedText from "./AnimatedText";
 
 function Home() {
@@ -15,7 +15,7 @@ function Home() {
 
           {/* Image Section - responsive sizing */}
           <div className="w-64 h-64 md:w-96 md:h-96 lg:w-120 lg:h-120 flex-shrink-0">
-            <PaperCanvas />
+            <VideoCanvas />
           </div>
         </div>
       </div>
