@@ -485,7 +485,7 @@ function PaperCanvas() {
           id="paper-canvas"
           width={800}
           height={800}
-          className="rounded-3xl w-full h-full"
+          className="rounded-sm w-full h-full"
           style={{
             display: "block",
             width: "100%",
