@@ -8,7 +8,7 @@ function Footer() {
   }, []);
 
   return (
-    <footer className="bg-blue-50 text-gray-900 py-12">
+    <footer className="bg-blue-50 text-gray-900 py-8">
       <div className="max-w-6xl mx-auto px-6">
         <div className="flex flex-col md:flex-row items-center justify-between">
           <div className="mb-4 md:mb-0">
