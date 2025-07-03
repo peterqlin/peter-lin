@@ -2,6 +2,12 @@ import React from "react";
 
 function Projects() {
   const projects = [
+    {
+      title: "Peters to the Max",
+      description: "Based on koalastothemax.com.",
+      tech: ["JavaScript", "Paper.js"],
+      link: "https://peterstothemax.vercel.app/",
+    },
     // {
     //   title: "Project Title",
     //   description:
@@ -12,24 +18,23 @@ function Projects() {
   ];
 
   return (
-    <section id="projects" className="py-16 bg-blue-50">
-      <div className="max-w-6xl mx-auto px-6">
+    <section
+      id="projects"
+      className="flex-1 min-h-screen flex flex-col py-16 bg-blue-50"
+    >
+      <div className="max-w-6xl mx-auto px-6 flex-1 flex flex-col">
         <h2 className="section-title text-center">Projects</h2>
 
-        {/* UNDER CONSTRUCTION SIGN */}
-        <div className="flex items-center justify-center min-h-[400px]">
-          <div className="text-center">
-            <div className="text-8xl font-bold text-gray-400 mb-4">🚧</div>
-            <h3 className="text-4xl font-bold text-gray-600 mb-2">
-              UNDER CONSTRUCTION
-            </h3>
-          </div>
-        </div>
-
-        {/* Commented out project grid for now */}
-        {/* <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           {projects.map((project, index) => (
-            <div key={index} className="card">
+            <a
+              key={index}
+              href={project.link}
+              className="card block hover:shadow-lg transition-shadow duration-300 cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-400"
+              target="_blank"
+              rel="noopener noreferrer"
+              tabIndex={0}
+            >
               <h3 className="text-xl font-semibold text-gray-900 mb-3">
                 {project.title}
               </h3>
@@ -46,15 +51,12 @@ function Projects() {
                   </span>
                 ))}
               </div>
-              <a
-                href={project.link}
-                className="text-blue-600 hover:text-blue-700 font-medium transition-colors duration-200"
-              >
+              <span className="text-blue-600 hover:text-blue-700 font-medium transition-colors duration-200">
                 View Project →
-              </a>
-            </div>
+              </span>
+            </a>
           ))}
-        </div> */}
+        </div>
       </div>
     </section>
   );
