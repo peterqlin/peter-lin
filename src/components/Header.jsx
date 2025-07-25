@@ -5,12 +5,7 @@ function Header() {
   const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  const navItems = [
-    { id: "home", label: "Home", path: "/" },
-    { id: "about", label: "About", path: "/about" },
-    { id: "projects", label: "Projects", path: "/projects" },
-    { id: "blog", label: "Blog", path: "/blog" },
-  ];
+  const navItems = [];
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -24,14 +19,6 @@ function Header() {
     <header className="bg-blue-50 z-50 relative">
       <div className="max-w-6xl mx-auto px-6 py-4">
         <div className="flex items-center justify-between">
-          <Link
-            to="/"
-            className="text-2xl font-bold text-gray-900 hover:text-blue-600 transition-colors duration-200"
-            onClick={closeMobileMenu}
-          >
-            Peter Lin
-          </Link>
-
           <nav className="hidden md:flex space-x-8">
             {navItems.map((item) => (
               <Link

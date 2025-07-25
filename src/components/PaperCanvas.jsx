@@ -401,19 +401,17 @@ function PaperCanvas() {
 
         if (!initialSquareGroup) return;
 
-        // Set initial state for animation
-        initialSquareGroup.opacity = 0;
+        // Remove initial fade-in: the square should be visible immediately
+        // initialSquareGroup.opacity = 0;
+        // initialSquareGroup.tweenTo(
+        //   { opacity: 1 },
+        //   {
+        //     duration: INITIAL_SQUARE_ANIMATION_DURATION,
+        //     easing: "easeInOutQuad",
+        //   }
+        // );
 
-        // Initial animation
-        initialSquareGroup.tweenTo(
-          { opacity: 1 },
-          {
-            duration: INITIAL_SQUARE_ANIMATION_DURATION,
-            easing: "easeInOutQuad",
-          }
-        );
-
-        // Start splitting after initial animation
+        // Start splitting after what was the initial animation duration
         setTimeout(() => {
           if (!isComponentMounted) return;
 

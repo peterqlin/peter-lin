@@ -7,6 +7,11 @@ function VideoCanvas() {
   const [hasCompleted, setHasCompleted] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
 
+  // Select video once on mount - this prevents the source from changing on re-renders
+  const [videoSource] = useState(() => {
+    return `portrait-animation-${Math.floor(Math.random() * 3) + 1}.mp4`;
+  });
+
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
@@ -98,7 +103,7 @@ function VideoCanvas() {
         disablePictureInPicture
         onContextMenu={(e) => e.preventDefault()}
       >
-        <source src="/portrait-animation.mp4" type="video/mp4" />
+        <source src={videoSource} type="video/mp4" />
         Your browser does not support the video tag.
       </video>
     </div>
