@@ -77,7 +77,13 @@ const AnimatedText = ({ text, className = "" }) => {
   return (
     <svg
       className={`animated-text ${className}`}
-      style={{ overflow: "visible" }}
+      style={{
+        overflow: "visible",
+        userSelect: "none",
+        WebkitUserSelect: "none",
+        MozUserSelect: "none",
+        msUserSelect: "none",
+      }}
       viewBox={`0 0 ${svgWidth} ${svgHeight}`}
     >
       {characters.map(({ char, index, lineIndex, x }) => (
